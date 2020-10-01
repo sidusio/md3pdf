@@ -40,6 +40,8 @@ func run(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 
+	fmt.Print(buf.String())
+
 	err = texToPdf(buf.Bytes(), strings.Split(input, ".")[0])
 	if err != nil {
 		fmt.Printf("Couldn't generate pdf from tex source")

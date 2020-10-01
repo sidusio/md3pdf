@@ -2,13 +2,17 @@ package latex
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/renderer"
 	"io"
+	"strings"
 )
 
 type latex struct{
-
+	indent int
+	w io.Writer
+	source []byte
 }
 
 func NewRenderer() *latex {
@@ -16,95 +20,74 @@ func NewRenderer() *latex {
 }
 
 func (l *latex) Render(w io.Writer, source []byte, node ast.Node) error {
+	node.Dump(source, 1)
+	l.source = source
+	l.w = w
+	return l.render(node)
+}
+
+func (l *latex) render(node ast.Node) error {
+
 	for n := node; n != nil; n = n.NextSibling() {
+		var err error
 		switch n.Type() {
 		case ast.TypeDocument:
-			err := l.renderDocument(w, source, n)
-			if err != nil {
-				return err
-			}
+			err = l.renderDocument(n)
 		case ast.TypeBlock:
-			err := l.renderBlock(w, source, n)
-			if err != nil {
-				return err
-			}
+			err = l.renderBlock(n)
 		case ast.TypeInline:
-			err := l.renderInline(w, source, n)
-			if err != nil {
-				return nil
-			}
+			err = l.renderInline(n)
 		default:
 			return fmt.Errorf("not implemented %d", n.Type())
+		}
+		if err != nil {
+			return errors.Wrapf(err, "coudln't render type: %d", n.Type())
 		}
 	}
 	return nil
 }
+
+
 
 func (l *latex) AddOptions(option ...renderer.Option) {
 	panic("implement me")
 }
 
-func (l *latex) renderDocument(w io.Writer, source []byte, node ast.Node) error {
-	_, _ = fmt.Fprintf(w, "\\documentclass{md3pdf}\n")
-	_, _ = fmt.Fprintf(w, "\\begin{document}\n")
+func (l *latex) renderDocument( node ast.Node) error {
+	_ = l.writeln("\\documentclass{md3pdf}")
+	_ = l.writeln("\\begin{document}")
 
-	err := l.Render(w, source, node.FirstChild())
+	err := l.render(node.FirstChild())
 	if err != nil {
 		return err
 	}
 
-	_, _ = fmt.Fprintf(w, "\\end{document}\n")
+	_ = l.writeln("\\end{document}")
 	return nil
 }
 
-func (l *latex) renderBlock(w io.Writer, source []byte, node ast.Node) error {
-	switch node.Kind() {
-	case ast.KindHeading:
-		err := l.renderHeading(w, source, node.(*ast.Heading))
-		if err != nil {
-			return err
-		}
-	case ast.KindParagraph:
-		err := l.renderParagraph(w, source, node.(*ast.Paragraph))
-		if err != nil {
-			return err
-		}
-	default:
-		return fmt.Errorf("not implemented block kind %s", node.Kind().String())
-	}
-	return nil
+func (l *latex) write(s string) error {
+	tabs := strings.Repeat("\t", l.indent)
+	_, err := fmt.Fprintf(l.w, "%s%s", tabs, s)
+	return err
 }
 
-func (l *latex) renderInline(w io.Writer, source []byte, node ast.Node) error {
-	switch node.Kind() {
-	case ast.KindText:
-		_,_ = fmt.Fprint(w, string(node.Text(source)))
-	}
-	return nil
+func (l *latex) writef(format string, s ...interface{}) error {
+	return l.write(fmt.Sprintf(format, s...))
 }
 
-func (l *latex) renderHeading(w io.Writer, source []byte, h *ast.Heading) error {
-	switch h.Level {
-	case 1:
-		_, _ = fmt.Fprint(w, "\\section{")
-	case 2:
-		_, _ = fmt.Fprint(w, "\\subsection{")
-	default:
-		return fmt.Errorf("not implemented heading level %d", h.Level)
-	}
-	err := l.Render(w, source, h.FirstChild())
-	if err != nil {
-		return err
-	}
-	_, _ = fmt.Fprint(w, "}\n")
-	return nil
+func (l *latex) writeln(s string) error {
+	return l.write(fmt.Sprintf("%s\n", s))
 }
 
-func (l *latex) renderParagraph(w io.Writer, source []byte, p *ast.Paragraph) error {
-	err := l.Render(w, source, p.FirstChild())
-	if err != nil {
-		return err
+func (l *latex) writefln(format string, s ...interface{}) error {
+	return l.writef(format + "\n", s...)
+}
+
+func (l *latex) writeLines(n ast.Node) {
+	line := n.Lines().Len()
+	for i := 0; i < line; i++ {
+		line := n.Lines().At(i)
+		_, _ = fmt.Fprint(l.w, string(line.Value(l.source)))
 	}
-	_, _ = fmt.Fprintf(w, "\n\n")
-	return nil
 }
