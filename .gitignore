@@ -1,4 +1,5 @@
-
+md3pdf
+*.pdf
 # Created by https://www.toptal.com/developers/gitignore/api/go,linux,windows,macos,intellij,vim,visualstudiocode,emacs
 # Edit at https://www.toptal.com/developers/gitignore?templates=go,linux,windows,macos,intellij,vim,visualstudiocode,emacs
 
