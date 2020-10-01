@@ -20,6 +20,10 @@
 \titleformat{\subsection}[hang]{\Large\bfseries}{}{0pt}{\Large\bfseries}
 \titleformat{\subsubsection}[hang]{\large\bfseries}{}{0pt}{\large\bfseries}
 
+\definecolor{pblue}{rgb}{0.13,0.13,1}
+\definecolor{pgreen}{rgb}{0,0.5,0}
+\definecolor{pred}{rgb}{0.9,0,0}
+
 \lstset{
     basicstyle=\ttfamily\footnotesize,
     showspaces=false,
