@@ -8,8 +8,14 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"sidus.io/md3pdf/internal/generated/assets"
 	"sidus.io/md3pdf/internal/pkg/latex"
 	"strings"
+)
+
+const (
+	clsName = "md3pdf"
+	clsFileName = clsName + ".cls"
 )
 
 var Md3PdfCommand = &cobra.Command{
@@ -52,6 +58,16 @@ func texToPdf(texBytes []byte, fileName string) error {
 
 	texFileName := fmt.Sprintf("%s/%s.tex", tmpDir, fileName)
 	err = ioutil.WriteFile(texFileName, texBytes, 0644)
+	if err != nil {
+		return err
+	}
+
+	asset, err := assets.Asset(clsFileName)
+	if err != nil {
+		return err
+	}
+	clsFileName := fmt.Sprintf("%s/%s", tmpDir, clsFileName)
+	err = ioutil.WriteFile(clsFileName, asset, 0644)
 	if err != nil {
 		return err
 	}

@@ -45,8 +45,7 @@ func (l *latex) AddOptions(option ...renderer.Option) {
 }
 
 func (l *latex) renderDocument(w io.Writer, source []byte, node ast.Node) error {
-	_, _ = fmt.Fprintf(w, "\\documentclass{article}\n")
-	_, _ = fmt.Fprintf(w, "\\usepackage[utf8]{inputenc}\n")
+	_, _ = fmt.Fprintf(w, "\\documentclass{md3pdf}\n")
 	_, _ = fmt.Fprintf(w, "\\begin{document}\n")
 
 	err := l.Render(w, source, node.FirstChild())
