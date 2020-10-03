@@ -13,6 +13,8 @@ type latex struct{
 	indent int
 	w io.Writer
 	source []byte
+	firstTableRowCellWritten bool
+	isTableHeader bool
 }
 
 func NewRenderer() *latex {
@@ -50,7 +52,6 @@ func (l *latex) render(node ast.Node) error {
 
 
 func (l *latex) AddOptions(option ...renderer.Option) {
-	panic("implement me")
 }
 
 func (l *latex) renderDocument( node ast.Node) error {

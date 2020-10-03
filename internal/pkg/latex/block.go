@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/yuin/goldmark/ast"
 	"github.com/pkg/errors"
+	ast2 "github.com/yuin/goldmark/extension/ast"
+	"strings"
 )
 
 func (l *latex) renderBlock(node ast.Node) error {
@@ -21,6 +23,14 @@ func (l *latex) renderBlock(node ast.Node) error {
 		err = l.render(node.FirstChild())
 	case ast.KindFencedCodeBlock:
 		err = l.renderFencedCodeBlock(node.(*ast.FencedCodeBlock))
+	case ast2.KindTable:
+		err = l.renderTable(node.(*ast2.Table))
+	case ast2.KindTableHeader:
+		err = l.renderTableHeader(node.(*ast2.TableHeader))
+	case ast2.KindTableRow:
+		err = l.renderTableRow(node.(*ast2.TableRow))
+	case ast2.KindTableCell:
+		err = l.renderTableCell(node.(*ast2.TableCell))
 	default:
 		return fmt.Errorf("not implemented block kind %s", node.Kind().String())
 	}
@@ -132,5 +142,101 @@ func (l *latex) renderFencedCodeBlock(block *ast.FencedCodeBlock) error {
 		return errors.Wrap(err, "coudln't render FencedCodeBlock")
 	}
 	err = l.writeln("\\end{lstlisting}")
+	return nil
+}
+
+func (l *latex) renderTable(table *ast2.Table) error {
+	err := l.writeln("\\begin{table}[H]")
+	if err != nil {
+		return errors.Wrap(err, "couldn't render table")
+	}
+	l.indent++
+
+	err = l.writeln("\\rowcolors{2}{white!80!black!50}{white!70!black!40}")
+	if err != nil {
+		return errors.Wrap(err, "couldn't render table")
+	}
+
+	alignments := make([]string, len(table.Alignments))
+	for i, alignment := range table.Alignments {
+		switch alignment {
+		case ast2.AlignCenter:
+			alignments[i] = "c"
+		case ast2.AlignRight:
+			alignments[i] = "r"
+		default:
+			alignments[i] = "l"
+		}
+	}
+
+	err = l.writefln("\\begin{tabular}{|%s|}", strings.Join(alignments, "|"))
+	if err != nil {
+		return errors.Wrap(err, "couldn't render table")
+	}
+	l.indent++
+
+	err = l.writeln("\\hline")
+	if err != nil {
+		return errors.Wrap(err, "couldn't render table")
+	}
+
+	err = l.render(table.FirstChild())
+	if err != nil {
+		return errors.Wrap(err, "couldn't render table")
+	}
+
+	l.indent--
+	err = l.writeln("\\end{tabular}")
+	if err != nil {
+		return errors.Wrap(err, "couldn't render table")
+	}
+
+	l.indent--
+	err = l.writeln("\\end{table}")
+	if err != nil {
+		return errors.Wrap(err, "couldn't render table")
+	}
+	return nil
+}
+
+func (l *latex) renderTableHeader(header *ast2.TableHeader) error {
+	l.isTableHeader = true
+	err := l.renderTableRow(header)
+	if err != nil {
+		return errors.Wrap(err, "couldn't render table header")
+	}
+	l.isTableHeader = false
+	return nil
+}
+
+func (l *latex) renderTableRow(row ast.Node) error {
+	l.firstTableRowCellWritten = false // Set to true in renderTableCell
+
+	err := l.render(row.FirstChild())
+	if err != nil {
+		return errors.Wrap(err, "couldn't render table row")
+	}
+
+	err = l.writeln("\\\\ \\hline")
+	if err != nil {
+		return errors.Wrap(err, "couldn't render table row")
+	}
+	return nil
+}
+
+func (l *latex) renderTableCell(row *ast2.TableCell) error {
+	var err error
+	if l.firstTableRowCellWritten {
+		err = l.write("& ")
+		if err != nil {
+			return errors.Wrap(err, "couldn't render table cell")
+		}
+	}
+	l.firstTableRowCellWritten = true // Set to false in renderTableRow
+
+	err = l.render(row.FirstChild())
+	if err != nil {
+		return errors.Wrap(err, "couldn't render table cell")
+	}
 	return nil
 }
