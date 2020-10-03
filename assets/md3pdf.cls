@@ -6,8 +6,10 @@
 \RequirePackage[utf8]{inputenc}
 \RequirePackage{parskip}
 \RequirePackage{titlesec}
-\RequirePackage{xcolor}
+\RequirePackage[table,dvipsnames]{xcolor}
 \RequirePackage{listings}
+\RequirePackage{float}
+\RequirePackage[normalem]{ulem}
 
 \titleformat{\paragraph}[hang]{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
 \titlespacing*{\paragraph}{0pt}{3.25ex plus 1ex minus .2ex}{1em}
@@ -36,3 +38,8 @@
     stringstyle=\color{pred},
     basicstyle=\ttfamily
 }
+
+\useunder{\uline}{\ul}{}
+
+\setlength{\tabcolsep}{18pt}
+\renewcommand{\arraystretch}{1.5}

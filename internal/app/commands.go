@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/extension"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -32,6 +33,7 @@ func run(cmd *cobra.Command, args []string) {
 	}
 
 	md := goldmark.New(
+		goldmark.WithExtensions(extension.Table),
 		goldmark.WithRenderer(latex.NewRenderer()),
 	)
 	var buf bytes.Buffer
