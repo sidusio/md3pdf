@@ -1,4 +1,9 @@
-${GOPATH}/bin/go-bindata:
+# This file requires the $GOPATH variable to be set in the environment
+
+# Finds the GOBIN directory
+gobin := $(shell (gobin="$(shell go env GOBIN)"; [[ -n "$$gobin" ]] && echo $$gobin || echo "$(shell go env GOPATH)/bin"))
+
+$(gobin)/go-bindata:
 	@echo "You need to download 'go-bindata' to generate the assets"
 	@read -p "Is it ok to run 'go get -u github.com/go-bindata/go-bindata/...'? (y/N) " ANSWER; \
 	if [[ $$ANSWER = "Y" || $$ANSWER = "y" ]]; then \
@@ -9,7 +14,7 @@ ${GOPATH}/bin/go-bindata:
 	fi
 
 .PHONY: gen
-gen: ${GOPATH}/bin/go-bindata
+gen: $(gobin)/go-bindata
 	go-bindata -prefix assets -pkg assets -o internal/generated/assets/assets.go assets
 
 .PHONY: build
