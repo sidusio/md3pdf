@@ -10,7 +10,7 @@ func (l *latex) renderInline(node ast.Node) error {
 	var err error
 	switch node.Kind() {
 	case ast.KindText:
-		err = l.write(string(node.Text(l.source)))
+		err = l.renderText(node.(*ast.Text))
 	case ast.KindEmphasis:
 		err = l.renderEmphasis(node.(*ast.Emphasis))
 	default:
@@ -18,6 +18,14 @@ func (l *latex) renderInline(node ast.Node) error {
 	}
 	if err != nil {
 		return errors.Wrapf(err, "coudln't render inline kind: %s", node.Kind().String())
+	}
+	return nil
+}
+
+func (l *latex) renderText(text *ast.Text) error {
+	err := l.write(escapeText(string(text.Text(l.source))))
+	if err != nil {
+		return errors.Wrap(err, "couldn't render text")
 	}
 	return nil
 }
