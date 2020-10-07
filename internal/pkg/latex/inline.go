@@ -13,6 +13,8 @@ func (l *latex) renderInline(node ast.Node) error {
 		err = l.renderText(node.(*ast.Text))
 	case ast.KindEmphasis:
 		err = l.renderEmphasis(node.(*ast.Emphasis))
+	case ast.KindLink:
+		err = l.renderLink(node.(*ast.Link))
 	default:
 		return fmt.Errorf("redering not implemented: inline kind: %s", node.Kind().String())
 	}
@@ -51,6 +53,22 @@ func (l *latex) renderEmphasis(emph *ast.Emphasis) error {
 	err = l.write("}")
 	if err != nil {
 		return errors.Wrap(err, "couldn't render emphasis")
+	}
+	return nil
+}
+
+func (l *latex) renderLink(link *ast.Link) error {
+	err := l.writef("\\href{%s}{", link.Destination)
+	if err != nil {
+		return errors.Wrap(err, "couldn't render link")
+	}
+	err = l.render(link.FirstChild())
+	if err != nil {
+		return errors.Wrap(err, "couldn't render link")
+	}
+	err = l.write("}")
+	if err != nil {
+		return errors.Wrap(err, "couldn't render link")
 	}
 	return nil
 }

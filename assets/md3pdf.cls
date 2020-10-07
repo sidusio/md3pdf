@@ -11,6 +11,14 @@
 \RequirePackage{float}
 \RequirePackage[normalem]{ulem}
 
+\RequirePackage{hyperref}
+\hypersetup{
+colorlinks=true,
+linkcolor=blue,
+filecolor=magenta,
+urlcolor=cyan,
+}
+
 \titleformat{\paragraph}[hang]{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
 \titlespacing*{\paragraph}{0pt}{3.25ex plus 1ex minus .2ex}{1em}
 
