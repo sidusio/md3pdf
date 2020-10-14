@@ -3,10 +3,12 @@ package app
 import (
 	"bytes"
 	"fmt"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"os/exec"
 	"sidus.io/md3pdf/internal/generated/assets"
@@ -17,6 +19,7 @@ import (
 const (
 	clsName = "md3pdf"
 	clsFileName = clsName + ".cls"
+	copyCommandName = "cp"
 )
 
 var Md3PdfCommand = &cobra.Command{
@@ -32,9 +35,10 @@ func run(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 
+	l := latex.NewRenderer()
 	md := goldmark.New(
 		goldmark.WithExtensions(extension.Table),
-		goldmark.WithRenderer(latex.NewRenderer()),
+		goldmark.WithRenderer(l),
 	)
 	var buf bytes.Buffer
 	err = md.Convert(inputFile, &buf)
@@ -44,16 +48,15 @@ func run(cmd *cobra.Command, args []string) {
 
 	fmt.Print(buf.String())
 
-	err = texToPdf(buf.Bytes(), strings.Split(input, ".")[0])
+	err = texToPdf(buf.Bytes(), strings.Split(input, ".")[0], l.Figures)
 	if err != nil {
 		fmt.Printf("Couldn't generate pdf from tex source")
 		panic(err)
 	}
 
-
 }
 
-func texToPdf(texBytes []byte, fileName string) error {
+func texToPdf(texBytes []byte, fileName string, figures []string) error {
 	tmpDir, err := ioutil.TempDir(os.TempDir(), "md3pdf-*")
 	if err != nil {
 		return err
@@ -76,15 +79,55 @@ func texToPdf(texBytes []byte, fileName string) error {
 		return err
 	}
 
+	err = moveLocalFigures(tmpDir, figures)
+	if err != nil {
+		return err
+	}
+
+	err = getRemoteFigures(tmpDir, figures)
+	if err != nil {
+		return err
+	}
+
 	pdflatexCmd := exec.Command("pdflatex", texFileName)
 	pdflatexCmd.Dir = tmpDir
 	err = pdflatexCmd.Run()
 	if err != nil {
 		return err
 	}
-	err = exec.Command("cp", fmt.Sprintf("%s/%s.pdf", tmpDir, fileName), ".").Run()
+	err = exec.Command(copyCommandName, fmt.Sprintf("%s/%s.pdf", tmpDir, fileName), ".").Run()
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func moveLocalFigures(dir string, figures []string) error {
+	for _, fig := range figures {
+		dest, err := url.Parse(fig)
+		if err != nil || dest.Host == "" || dest.Scheme == "" {
+			err := exec.Command(copyCommandName, fig, dir).Run()
+			if err != nil {
+				return errors.Wrapf(err, "couldn't copy file %s", fig)
+			}
+		}
+
+	}
+	return nil
+}
+
+func getRemoteFigures(dir string, figures []string) error {
+	for _, fig := range figures {
+		dest, err := url.Parse(fig)
+		if err != nil || dest.Host == "" || dest.Scheme == "" {
+			continue
+		}
+		wgetCommand := exec.Command("wget", fig)
+		wgetCommand.Dir = dir
+		err = wgetCommand.Run()
+		if err != nil {
+			return errors.Wrapf(err, "couldn't download %s", fig)
+		}
 	}
 	return nil
 }

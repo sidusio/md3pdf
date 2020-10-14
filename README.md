@@ -37,4 +37,4 @@ func main() {
 | col 3 is | right-aligned |    $1 |
 
 [_test_](https://google.com)
-![]()
+![test](https://digit.chalmers.it/loggor/digit-17.png)
