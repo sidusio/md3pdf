@@ -10,6 +10,8 @@
 \RequirePackage{listings}
 \RequirePackage{float}
 \RequirePackage[normalem]{ulem}
+\RequirePackage{graphicx}
+\RequirePackage[export]{adjustbox}
 
 \RequirePackage{hyperref}
 \hypersetup{

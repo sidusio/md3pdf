@@ -10,11 +10,12 @@ import (
 )
 
 type latex struct{
-	indent int
-	w io.Writer
-	source []byte
+	indent                   int
+	w                        io.Writer
+	source                   []byte
 	firstTableRowCellWritten bool
-	isTableHeader bool
+	isTableHeader            bool
+	Figures                  []string
 }
 
 func NewRenderer() *latex {

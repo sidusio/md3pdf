@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/yuin/goldmark/ast"
+	"net/url"
+	"strings"
 )
 
 func (l *latex) renderInline(node ast.Node) error {
@@ -15,6 +17,8 @@ func (l *latex) renderInline(node ast.Node) error {
 		err = l.renderEmphasis(node.(*ast.Emphasis))
 	case ast.KindLink:
 		err = l.renderLink(node.(*ast.Link))
+	case ast.KindImage:
+		err = l.renderImage(node.(*ast.Image))
 	default:
 		return fmt.Errorf("redering not implemented: inline kind: %s", node.Kind().String())
 	}
@@ -70,5 +74,25 @@ func (l *latex) renderLink(link *ast.Link) error {
 	if err != nil {
 		return errors.Wrap(err, "couldn't render link")
 	}
+	return nil
+}
+func (l *latex) renderImage(image *ast.Image) error {
+	var file string
+	dest, err := url.Parse(string(image.Destination))
+	if err != nil || dest.Host == "" || dest.Scheme == "" {
+		// Refers to a local file
+		file = string(image.Destination)
+	} else {
+		// refers to an url
+		l.Figures = append(l.Figures, dest.String())
+		p := strings.Split(dest.Path, "/")
+		file = p[len(p)-1]
+	}
+	if strings.Split(file, ".")[1] == "svg" {
+		_ = l.writef("\\includesvg[max width=0.9\\linewidth]{%s}", file)
+	} else {
+		_ = l.writef("\\includegraphics[max width=0.9\\linewidth]{%s}", file)
+	}
+
 	return nil
 }
