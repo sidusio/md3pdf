@@ -19,6 +19,8 @@ func (l *latex) renderInline(node ast.Node) error {
 		err = l.renderLink(node.(*ast.Link))
 	case ast.KindImage:
 		err = l.renderImage(node.(*ast.Image))
+	case ast.KindCodeSpan:
+		err = l.renderCodeSpan(node.(*ast.CodeSpan))
 	default:
 		return fmt.Errorf("redering not implemented: inline kind: %s", node.Kind().String())
 	}
@@ -98,5 +100,21 @@ func (l *latex) renderImage(image *ast.Image) error {
 	_ = l.writef("\\includegraphics[max width=0.9\\linewidth]{%s.png}\n", file)
 	_ = l.writeln("\\end{figure}")
 
+	return nil
+}
+
+func (l *latex) renderCodeSpan(code *ast.CodeSpan) error {
+	err := l.write("\\texttt{")
+	if err != nil {
+		return errors.Wrap(err, "couldn't render code span")
+	}
+	err = l.render(code.FirstChild())
+	if err != nil {
+		return errors.Wrap(err, "couldn't render code span")
+	}
+	err = l.write("}")
+	if err != nil {
+		return errors.Wrap(err, "couldn't render code span")
+	}
 	return nil
 }
