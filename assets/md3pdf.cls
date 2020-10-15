@@ -12,6 +12,11 @@
 \RequirePackage[normalem]{ulem}
 \RequirePackage{graphicx}
 \RequirePackage[export]{adjustbox}
+\RequirePackage{csquotes}
+\RequirePackage[most]{tcolorbox}
+\definecolor{block-gray}{gray}{0.8}
+\newtcolorbox{myquote}{colback=block-gray,grow to right by=-10mm,grow to left by=-10mm,
+boxrule=0pt,boxsep=0pt,breakable}
 
 \RequirePackage{hyperref}
 \hypersetup{
