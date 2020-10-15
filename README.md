@@ -4,6 +4,9 @@ This is a predecessor to md2pdf
 Interesting title
 ----------------------
 `cody text`
+> A meaningful quote
+
+-Some dude
 
 ## Contributing
 1. asd

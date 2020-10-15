@@ -31,6 +31,8 @@ func (l *latex) renderBlock(node ast.Node) error {
 		err = l.renderTableRow(node.(*ast2.TableRow))
 	case ast2.KindTableCell:
 		err = l.renderTableCell(node.(*ast2.TableCell))
+	case ast.KindBlockquote:
+		err = l.renderBlockQuote(node.(*ast.Blockquote))
 	default:
 		return fmt.Errorf("not implemented block kind %s", node.Kind().String())
 	}
@@ -238,5 +240,18 @@ func (l *latex) renderTableCell(row *ast2.TableCell) error {
 	if err != nil {
 		return errors.Wrap(err, "couldn't render table cell")
 	}
+	return nil
+}
+
+func (l *latex) renderBlockQuote(blockquote *ast.Blockquote) error {
+	_ = l.write("\n")
+	_ = l.writeln("\\begin{myquote}")
+
+	err := l.render(blockquote.FirstChild())
+	if err != nil {
+		return errors.Wrap(err, "couldn't render blockquote")
+	}
+
+	_ = l.writef("\\end{myquote}\n\n")
 	return nil
 }
