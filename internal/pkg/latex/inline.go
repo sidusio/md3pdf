@@ -88,11 +88,8 @@ func (l *latex) renderImage(image *ast.Image) error {
 		p := strings.Split(dest.Path, "/")
 		file = p[len(p)-1]
 	}
-	if strings.Split(file, ".")[1] == "svg" {
-		_ = l.writef("\\includesvg[max width=0.9\\linewidth]{%s}", file)
-	} else {
-		_ = l.writef("\\includegraphics[max width=0.9\\linewidth]{%s}", file)
-	}
+
+	_ = l.writef("\\includegraphics[max width=0.9\\linewidth]{%s}", file)
 
 	return nil
 }
