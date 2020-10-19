@@ -14,6 +14,7 @@ var oldNew = []string{
 	"%", "\\%",
 	"_", "\\_",
 	"^", "\\^",
+	"#", "\\#",
 }
 
 func escapeText(text string) string {
