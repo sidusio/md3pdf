@@ -135,10 +135,13 @@ func (l *latex) renderFencedCodeBlock(block *ast.FencedCodeBlock) error {
 	if err != nil {
 		return errors.Wrap(err, "coudln't render FencedCodeBlock")
 	}
-	err = l.writefln( "[language=%s]", lang)
-	if err != nil {
-		return errors.Wrap(err, "coudln't render FencedCodeBlock")
+	if string(lang) != "" {
+		err = l.writefln( "[language=%s]", lang)
+		if err != nil {
+			return errors.Wrap(err, "coudln't render FencedCodeBlock")
+		}
 	}
+
 	l.writeLines(block)
 	if err != nil {
 		return errors.Wrap(err, "coudln't render FencedCodeBlock")
