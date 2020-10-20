@@ -38,3 +38,4 @@ func main() {
 
 [_test_](https://google.com)
 ![test](https://digit.chalmers.it/loggor/digit-17.png)
+![test](./assets/digit20.svg)

@@ -76,12 +76,17 @@ func (l *latex) renderLink(link *ast.Link) error {
 	}
 	return nil
 }
+
 func (l *latex) renderImage(image *ast.Image) error {
+	_ = l.writeln("\n\\begin{figure}")
 	var file string
 	dest, err := url.Parse(string(image.Destination))
+	fmt.Println(string(image.Destination))
 	if err != nil || dest.Host == "" || dest.Scheme == "" {
 		// Refers to a local file
-		file = string(image.Destination)
+		l.Figures = append(l.Figures, string(image.Destination))
+		p := strings.Split(string(image.Destination), "/")
+		file = p[len(p)-1]
 	} else {
 		// refers to an url
 		l.Figures = append(l.Figures, dest.String())
@@ -89,7 +94,9 @@ func (l *latex) renderImage(image *ast.Image) error {
 		file = p[len(p)-1]
 	}
 
-	_ = l.writef("\\includegraphics[max width=0.9\\linewidth]{%s}", file)
+
+	_ = l.writef("\\includegraphics[max width=0.9\\linewidth]{%s.png}\n", file)
+	_ = l.writeln("\\end{figure}")
 
 	return nil
 }
