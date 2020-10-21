@@ -33,6 +33,8 @@ func (l *latex) renderBlock(node ast.Node) error {
 		err = l.renderTableCell(node.(*ast2.TableCell))
 	case ast.KindBlockquote:
 		err = l.renderBlockQuote(node.(*ast.Blockquote))
+	case ast.KindThematicBreak:
+		err = l.renderThematicBreak(node.(*ast.ThematicBreak))
 	default:
 		return fmt.Errorf("not implemented block kind %s", node.Kind().String())
 	}
@@ -256,5 +258,13 @@ func (l *latex) renderBlockQuote(blockquote *ast.Blockquote) error {
 	}
 
 	_ = l.writef("\\end{myquote}\n\n")
+	return nil
+}
+
+func (l *latex) renderThematicBreak(thematicBreak *ast.ThematicBreak) error {
+	err := l.writeln("\\newpage")
+	if err != nil {
+		return errors.Wrapf(err, "couldn't write '\\newpage' in thematic break")
+	}
 	return nil
 }
