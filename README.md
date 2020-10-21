@@ -8,6 +8,8 @@ Interesting title
 
 -Some dude
 
+***
+
 ## Contributing
 1. asd
 2. 123123
@@ -45,4 +47,4 @@ func main() {
 
 [_test_](https://google.com)
 ![test](https://digit.chalmers.it/loggor/digit-17.png)
-![test](./assets/digit20.svg)
+![test](https://digit.chalmers.it/digit20.svg)
